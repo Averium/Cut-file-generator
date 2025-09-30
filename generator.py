@@ -4,6 +4,7 @@ from os.path import join
 from matplotlib import pyplot as plt
 
 from vector import Vector
+from functools import wraps
 
 
 class Generator:
@@ -105,6 +106,11 @@ class Generator:
         cls._mark_()
 
     @classmethod
+    def move_home(cls):
+        """ Moves the effector to [0, 0] and draws a line along the path """
+        cls.move_to(0, 0)
+
+    @classmethod
     def turn(cls, angle):
         """ Turns the direction vector by <angle> counter-clockwise """
         cls.direction = cls.direction.rotate(cls.deg_to_rad(angle))
@@ -173,3 +179,17 @@ class Generator:
         plt.legend()
         plt.title(cls._header)
         plt.show()
+
+
+def movement(name, header):
+
+    def outer_wrapper(original_function):
+
+        def inner_wrapper(*args, **kwargs):
+            Generator.begin(name, header)
+            original_function(*args, **kwargs)
+            Generator.end()
+            Generator.plot()
+
+        return inner_wrapper
+    return outer_wrapper
